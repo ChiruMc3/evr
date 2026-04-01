@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Brunos+Ace+SC&family=Julius+Sans+One&family=Langar&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-navy-900 text-cream font-body antialiased;
+  }
+
+  h1 {
+    @apply font-hero text-6xl md:text-7xl text-golden-light;
+  }
+
+  h2 {
+    @apply font-ui text-4xl md:text-5xl text-golden-light;
+  }
+
+  h3 {
+    @apply font-ui text-2xl md:text-3xl text-golden;
+  }
+
+  h4 {
+    @apply font-ui text-xl text-golden;
+  }
+
+  h5, h6 {
+    @apply font-body text-lg text-cream;
+  }
+
+  p {
+    @apply font-body text-base md:text-lg text-cream/85;
+    line-height: 1.8;
+  }
+
+  /* keep link styles, but do not force button links to inherit */
+  a:not(.btn-primary):not(.btn-outline):not(.btn-secondary):not(.btn-tertiary) {
+    @apply text-golden transition-colors duration-300 hover:text-golden-dark;
+  }
+
+  ::selection {
+    @apply bg-golden/30 text-white;
+  }
+
+  /* Respect user motion preferences globally */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .section-padding {
+    @apply px-5 sm:px-8 md:px-12 lg:px-20 xl:px-28;
+  }
+
+  /* Offscreen sections skip rendering until near viewport */
+  .section-lazy {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-3 rounded-full
+           bg-golden text-navy-900 font-ui font-bold
+           transition-all duration-300 ease-out
+           hover:bg-golden-dark hover:shadow-lg hover:shadow-golden/20
+           active:scale-[0.97];
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .btn-outline,
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-8 py-3 rounded-full
+           border-2 border-golden text-golden font-ui font-bold
+           transition-all duration-300 ease-out
+           hover:bg-golden hover:text-navy-900 hover:shadow-lg hover:shadow-golden/20
+           active:scale-[0.97];
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .btn-tertiary {
+    @apply inline-flex items-center gap-2 text-golden font-body font-semibold
+           transition-all duration-300 hover:text-golden-light;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-golden-light via-golden to-golden-dark
+           bg-clip-text text-transparent;
+  }
+
+  /* Masonry grid defaults */
+  .masonry-grid {
+    column-gap: 0.75rem;
+    column-count: 1;
+  }
+
+  .masonry-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Explicit masonry variants for page-level control */
+  .masonry-1 { column-count: 1; }
+  .masonry-2 { column-count: 2; }
+  .masonry-3 { column-count: 3; }
+  .masonry-4 { column-count: 4; }
+
+  .masonry-strip {
+    column-gap: 0.75rem;
+  }
+
+  .masonry-strip > * {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  @media (min-width: 480px) {
+    .masonry-grid { column-count: 2; }
+  }
+
+  @media (min-width: 768px) {
+    .masonry-grid.masonry-2-md { column-count: 2; }
+  }
+
+  @media (min-width: 1024px) {
+    .masonry-grid.masonry-3-lg { column-count: 3; }
+  }
+
+  @media (min-width: 1280px) {
+    .masonry-grid.masonry-4-xl { column-count: 4; }
+  }
+}
+
+@layer utilities {
+  /* GPU-accelerated transforms */
+  .gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+}

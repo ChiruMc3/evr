@@ -1,0 +1,36 @@
+/* Primary Button - Gold filled */
+.btn-primary {
+  @apply px-8 py-3 bg-golden text-navy-900 rounded-full font-semibold tracking-wide transition-all duration-300 hover:bg-golden/90 hover:shadow-lg active:bg-golden/80;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(247, 212, 97, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+/* Secondary Button - Outlined */
+.btn-secondary {
+  @apply px-8 py-3 border-2 border-golden text-golden rounded-full font-semibold tracking-wide transition-all duration-300 hover:bg-golden/10 hover:shadow-lg active:bg-golden/20;
+}
+
+.btn-secondary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
+}
+
+/* Tertiary Button - Text link */
+.btn-tertiary {
+  @apply text-golden font-semibold tracking-wide transition-all duration-300 hover:text-golden/80 inline-flex items-center gap-2;
+}
+
+.btn-tertiary:hover {
+  transform: translateX(4px);
+}

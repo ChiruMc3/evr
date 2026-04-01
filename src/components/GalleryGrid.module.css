@@ -1,0 +1,40 @@
+.grid {
+  columns: 3;
+  column-gap: 1rem;
+}
+
+.item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.item img {
+  width: 100%;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.item:hover img { transform: scale(1.05); }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.item:hover .overlay { opacity: 1; }
+
+.overlay span {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+@media (max-width: 900px) { .grid { columns: 2; } }
+@media (max-width: 520px) { .grid { columns: 1; } }
