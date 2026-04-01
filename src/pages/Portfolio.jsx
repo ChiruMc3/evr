@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { imageCategories } from '../config/imageUrls';
 import MasonryGallery from '../components/MasonryGallery';
 
@@ -22,16 +22,56 @@ const PORTFOLIO_CATEGORIES = [
 
 export default function Portfolio() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [isDataReady, setIsDataReady] = useState(false);
+  const [categoriesData, setCategoriesData] = useState({
+    weddings: [],
+    preWedding: [],
+    babyShowers: [],
+    modelShoots: [],
+    events: [],
+    haldi: [],
+  });
+
+  // Keep syncing until image data is actually available (mobile-safe)
+  useEffect(() => {
+    let mounted = true;
+
+    const readCategories = () => ({
+      weddings: imageCategories?.weddings || [],
+      preWedding: imageCategories?.preWedding || [],
+      babyShowers: imageCategories?.babyShowers || [],
+      modelShoots: imageCategories?.modelShoots || [],
+      events: imageCategories?.events || [],
+      haldi: imageCategories?.haldi || [],
+    });
+
+    const sync = () => {
+      if (!mounted) return false;
+      const next = readCategories();
+      const total = Object.values(next).flat().length;
+      setCategoriesData(next);
+
+      if (total > 0) {
+        setIsDataReady(true);
+        return true;
+      }
+      return false;
+    };
+
+    if (sync()) return () => {};
+
+    const interval = setInterval(() => {
+      if (sync()) clearInterval(interval);
+    }, 300);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Ensure image data exists
-  const allCategories = {
-    weddings: imageCategories?.weddings || [],
-    preWedding: imageCategories?.preWedding || [],
-    babyShowers: imageCategories?.babyShowers || [],
-    modelShoots: imageCategories?.modelShoots || [],
-    events: imageCategories?.events || [],
-    haldi: imageCategories?.haldi || [],
-  };
+  const allCategories = categoriesData;
 
   // Get all images flattened
   const allImages = useMemo(
@@ -67,6 +107,13 @@ export default function Portfolio() {
     (cat) => categoryCounts[cat.id] > 0 || cat.id === 'all'
   );
 
+  // Recalculate masonry layout after images/category change (desktop fix)
+  useEffect(() => {
+    if (filteredImages.length > 0) {
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, [activeCategory, filteredImages.length]);
+
   return (
     <motion.main
       variants={pageVariants}
@@ -100,7 +147,9 @@ export default function Portfolio() {
       <section className="py-8 md:py-12 px-6 bg-navy-800/20 sticky top-16 md:top-20 z-40">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-2 overflow-x-auto pb-2 justify-center md:justify-start md:flex-wrap">
-            {availableCategories.length > 0 ? (
+            {!isDataReady ? (
+              <p className="text-cream/60 text-center w-full">Loading categories...</p>
+            ) : availableCategories.length > 0 ? (
               availableCategories.map((category) => (
                 <motion.button
                   key={category.id}
@@ -122,7 +171,7 @@ export default function Portfolio() {
                 </motion.button>
               ))
             ) : (
-              <p className="text-cream/60 text-center w-full">Loading categories...</p>
+              <p className="text-cream/60 text-center w-full">No categories available</p>
             )}
           </div>
         </div>
@@ -131,9 +180,17 @@ export default function Portfolio() {
       {/* Gallery Section */}
       <section className="py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
-          {filteredImages.length > 0 ? (
+          {!isDataReady ? (
             <motion.div
-              key={activeCategory}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-24 text-cream/70"
+            >
+              Loading portfolio...
+            </motion.div>
+          ) : filteredImages.length > 0 ? (
+            <motion.div
+              key={`${activeCategory}-${filteredImages.length}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
