@@ -1,5 +1,5 @@
-import { lazy, Suspense, Component, createContext, useState, useCallback, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense, Component, createContext, useState, useCallback, useEffect, useRef } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -69,6 +69,79 @@ class RouteErrorBoundary extends Component {
   }
 }
 
+function ImageLoadGate({ children }) {
+  const containerRef = useRef(null);
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
+
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) {
+      setIsLoadingImages(false);
+      return;
+    }
+
+    const MIN_LOADER_MS = 300;
+    const startedAt = performance.now();
+    let timeoutId;
+    let settled = false;
+
+    const completeGate = () => {
+      if (settled) return;
+      settled = true;
+      const elapsed = performance.now() - startedAt;
+      const wait = Math.max(0, MIN_LOADER_MS - elapsed);
+
+      if (wait > 0) {
+        timeoutId = window.setTimeout(() => setIsLoadingImages(false), wait);
+      } else {
+        setIsLoadingImages(false);
+      }
+    };
+
+    const images = Array.from(root.querySelectorAll('img'));
+    if (images.length === 0) {
+      completeGate();
+      return () => {
+        if (timeoutId) window.clearTimeout(timeoutId);
+      };
+    }
+
+    let remaining = 0;
+    const onDone = () => {
+      remaining -= 1;
+      if (remaining <= 0) completeGate();
+    };
+
+    images.forEach((img) => {
+      if (img.complete) return; // already resolved (loaded or errored)
+      remaining += 1;
+      img.addEventListener('load', onDone, { once: true });
+      img.addEventListener('error', onDone, { once: true });
+    });
+
+    if (remaining === 0) completeGate();
+
+    return () => {
+      images.forEach((img) => {
+        img.removeEventListener('load', onDone);
+        img.removeEventListener('error', onDone);
+      });
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      {children}
+      {isLoadingImages && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
+          <Loader />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -78,7 +151,7 @@ function AnimatedRoutes() {
         <Suspense fallback={<Loader />}>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
-            <Route path="/portfolio" element={<Portfolio />} />
+            <Route path="/portfolio" element={<ImageLoadGate><Portfolio /></ImageLoadGate>} />
             <Route path="/services" element={<Services />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
@@ -219,7 +292,7 @@ function App() {
   return (
     <AppProvider>
       <DynamicFavicon />
-      <Router
+      <BrowserRouter
         future={{
           v7_startTransition: true,
           v7_relativeSplatPath: true,
@@ -231,7 +304,7 @@ function App() {
           <AnimatedRoutes />
         </div>
         <Footer />
-      </Router>
+      </BrowserRouter>
     </AppProvider>
   );
 }
